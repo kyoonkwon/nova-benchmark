@@ -8,6 +8,7 @@ from logger import logger
 
 logger.setLevel("ERROR")
 
+model_name = "Claude 3.5 Sonnet V2"
 hf_dataset_id = "HAERAE-HUB/KMMLU"
 dataset_name = "KMMLU"
 kmmlu_category = [
@@ -58,7 +59,7 @@ kmmlu_category = [
     # "Telecommunications-and-Wireless-Technology",
 ]
 
-def process_item(item, model_name="Nova Pro", max_retries=3):
+def process_item(item, model_name, max_retries=3):
     """각 항목을 처리하는 함수"""
     question = item["question"]
     A = item["A"]
@@ -86,6 +87,7 @@ def process_item(item, model_name="Nova Pro", max_retries=3):
 
 # 결과 저장을 위한 디렉토리 생성
 os.makedirs('results', exist_ok=True)
+os.makedirs(f'results/{model_name}', exist_ok=True)
 
 for idx, category in enumerate(kmmlu_category):
     dataset = load_dataset(hf_dataset_id, category)
@@ -99,14 +101,14 @@ for idx, category in enumerate(kmmlu_category):
     # 병렬 처리를 위한 리스트 생성
     items = list(ds_test)
     results = [None] * len(items)  # 결과를 저장할 리스트
-    
+
     # 프로그레스 바 생성
     with tqdm(total=len(items), desc=f"Processing {category}") as pbar:
         # 최대 5개의 작업을 동시에 실행
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             # 모든 작업을 예약하고 future 객체를 저장
             future_to_idx = {
-                executor.submit(process_item, item): i 
+                executor.submit(process_item, item, model_name): i 
                 for i, item in enumerate(items)
             }
         
@@ -135,6 +137,6 @@ for idx, category in enumerate(kmmlu_category):
     })
     
     # CSV 파일로 저장
-    output_path = f'results/{category}_results.csv'
+    output_path = f'results/{model_name}/{category}_results.csv'
     result_df.to_csv(output_path, index=False)
     logger.info(f'{category} 결과가 {output_path}에 저장되었습니다.')

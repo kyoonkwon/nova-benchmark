@@ -1,10 +1,10 @@
 import time
 from langchain_aws import ChatBedrockConverse
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.output_parsers import StrOutputParser
 from botocore.exceptions import ClientError
 from logger import logger
-
+from pydantic import BaseModel, Field
+from typing import Literal
 
 models = [
     {
@@ -30,12 +30,36 @@ models = [
       "model_id": "amazon.nova-pro-v1:0",
       "regions": 
         {
-          "ap-northeast-2": "apac",
           "us-east-1": "us",
+          "ap-northeast-2": "apac",
+          "eu-central-1": "eu"
+        }
+    },
+    {
+      "model_name": "Nova Micro",
+      "model_id": "amazon.nova-micro-v1:0",
+      "regions": 
+        {
+          "us-east-1": "us",
+          "ap-northeast-2": "apac",
+          "eu-central-1": "eu"
+        }
+    },
+    {
+      "model_name": "Nova Lite",
+      "model_id": "amazon.nova-lite-v1:0",
+      "regions": 
+        {
+          "us-east-1": "us",
+          "ap-northeast-2": "apac",
           "eu-central-1": "eu"
         }
     },
 ]
+
+class Answer(BaseModel):
+    answer: Literal["A", "B", "C", "D"] = Field(description="The answer to the question")
+    reason: str = Field(description="The reason for the answer")
 
 
 def invoke_with_retry(messages, model_name="Claude 3.7 Sonnet", max_retries=3):
@@ -51,9 +75,6 @@ def invoke_with_retry(messages, model_name="Claude 3.7 Sonnet", max_retries=3):
     
     model_id = model["model_id"]
     available_regions = list(model["regions"].keys())
-    
-    # 출력 파서 설정
-    output_parser = StrOutputParser()
     
     retry_count = 0
     
@@ -74,7 +95,7 @@ def invoke_with_retry(messages, model_name="Claude 3.7 Sonnet", max_retries=3):
             )
             
             # 체인 구성
-            chain = bedrock_model | output_parser
+            chain = bedrock_model.with_structured_output(Answer)
             
             # 모델 호출
             return chain.invoke(messages)
@@ -97,13 +118,12 @@ def invoke_with_retry(messages, model_name="Claude 3.7 Sonnet", max_retries=3):
 
 def generate_prompt(question, A, B, C, D):
     
-    return HumanMessage(content=f"""주어진 질문을 천천히 읽고, 질문에 대한 적절한 정답을 A, B, C, D 중에 골라 알파벳 하나로 답하시오.
-    Question: {question}
+    return HumanMessage(content=f"""{question}
     A: {A}
     B: {B}
     C: {C}
     D: {D}
-    Answer: """)
+    정답:""")
 
 if __name__ == "__main__":
     messages = [
