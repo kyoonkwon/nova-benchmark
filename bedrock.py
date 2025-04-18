@@ -55,6 +55,30 @@ models = [
           "eu-central-1": "eu"
         }
     },
+    {
+      "model_name": "Llama 3.1 70B Instruct",
+      "model_id": "meta.llama3-1-70b-instruct-v1:0",
+      "regions": 
+        {
+          "us-east-1": "us",
+        }
+    },
+    {
+      "model_name": "Llama 3.3 70B Instruct",
+      "model_id": "meta.llama3-3-70b-instruct-v1:0",
+      "regions": 
+        {
+          "us-east-1": "us",
+        }
+    },
+    {
+      "model_name": "Claude 3.5 Haiku",
+      "model_id": "anthropic.claude-3-5-haiku-20241022-v1:0",
+      "regions": 
+        {
+          "us-east-1": "us",
+        }
+    },
 ]
 
 class Answer(BaseModel):

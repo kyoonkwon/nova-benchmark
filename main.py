@@ -8,25 +8,26 @@ from logger import logger
 
 logger.setLevel("ERROR")
 
-model_name = "Claude 3.5 Sonnet V2"
+model_name = "Claude 3.5 Haiku"
 hf_dataset_id = "HAERAE-HUB/KMMLU"
 dataset_name = "KMMLU"
 kmmlu_category = [
     "Accounting",
-    # "Agricultural-Sciences",
-    # "Aviation-Engineering-and-Maintenance",
-    # "Biology",
-    # "Chemical-Engineering",
-    # "Chemistry",
-    # "Civil-Engineering",
-    # "Computer-Science",
-    # "Construction",
-    # "Criminal-Law",
-    # "Ecology",
-    # "Economics",
-    # "Education",
-    # "Electrical-Engineering",
-    # "Electronics-Engineering",
+    "Agricultural-Sciences",
+    "Aviation-Engineering-and-Maintenance",
+    "Biology",
+    "Chemical-Engineering",
+    "Chemistry",
+    "Civil-Engineering",
+    "Computer-Science",
+    "Construction",
+    "Criminal-Law",
+    "Ecology",
+    "Economics",
+    "Education",
+    "Electrical-Engineering",
+    "Electronics-Engineering",
+    
     # "Energy-Management",
     # "Environmental-Science",
     # "Fashion",
@@ -41,6 +42,7 @@ kmmlu_category = [
     # "Law",
     # "Machine-Design-and-Manufacturing",
     # "Management",
+    
     # "Maritime-Engineering",
     # "Marketing",
     # "Materials-Engineering",
