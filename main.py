@@ -8,7 +8,7 @@ from logger import logger
 
 logger.setLevel("ERROR")
 
-model_name = "Nova Premier"
+model_name = "Claude 3.5 Haiku"
 hf_dataset_id = "HAERAE-HUB/KMMLU"
 dataset_name = "KMMLU"
 kmmlu_category = [
