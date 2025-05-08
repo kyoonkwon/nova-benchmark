@@ -28,40 +28,40 @@ kmmlu_category = [
     "Electrical-Engineering",
     "Electronics-Engineering",
     
-    # "Energy-Management",
-    # "Environmental-Science",
-    # "Fashion",
-    # "Food-Processing",
-    # "Gas-Technology-and-Engineering",
-    # "Geomatics",
-    # "Health",
-    # "Industrial-Engineer",
-    # "Information-Technology",
-    # "Interior-Architecture-and-Design",
-    # "Korean-History",
-    # "Law",
-    # "Machine-Design-and-Manufacturing",
-    # "Management",
+    "Energy-Management",
+    "Environmental-Science",
+    "Fashion",
+    "Food-Processing",
+    "Gas-Technology-and-Engineering",
+    "Geomatics",
+    "Health",
+    "Industrial-Engineer",
+    "Information-Technology",
+    "Interior-Architecture-and-Design",
+    "Korean-History",
+    "Law",
+    "Machine-Design-and-Manufacturing",
+    "Management",
     
-    # "Maritime-Engineering",
-    # "Marketing",
-    # "Materials-Engineering",
-    # "Math",
-    # "Mechanical-Engineering",
-    # "Nondestructive-Testing",
-    # "Patent",
-    # "Political-Science-and-Sociology",
-    # "Psychology",
-    # "Public-Safety",
-    # "Railway-and-Automotive-Engineering",
-    # "Real-Estate",
-    # "Refrigerating-Machinery",
-    # "Social-Welfare",
-    # "Taxation",
-    # "Telecommunications-and-Wireless-Technology",
+    "Maritime-Engineering",
+    "Marketing",
+    "Materials-Engineering",
+    "Math",
+    "Mechanical-Engineering",
+    "Nondestructive-Testing",
+    "Patent",
+    "Political-Science-and-Sociology",
+    "Psychology",
+    "Public-Safety",
+    "Railway-and-Automotive-Engineering",
+    "Real-Estate",
+    "Refrigerating-Machinery",
+    "Social-Welfare",
+    "Taxation",
+    "Telecommunications-and-Wireless-Technology",
 ]
 
-def process_item(item, model_name, max_retries=3):
+def process_item(item, model_name, max_retries=10):
     """각 항목을 처리하는 함수"""
     question = item["question"]
     A = item["A"]
@@ -93,7 +93,7 @@ os.makedirs(f'results/{model_name}', exist_ok=True)
 
 for idx, category in enumerate(kmmlu_category):
     dataset = load_dataset(hf_dataset_id, category)
-    
+
     # ds_dev = dataset["dev"]
     # ds_dev = ds_dev.map(lambda x: {"answer": "ABCD"[x["answer"]-1]})
 
