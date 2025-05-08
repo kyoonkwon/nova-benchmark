@@ -36,6 +36,14 @@ models = [
         }
     },
     {
+      "model_name": "Nova Premier",
+      "model_id": "amazon.nova-premier-v1:0",
+      "regions": 
+        {
+          "us-east-1": "us",
+        }
+    },
+    {
       "model_name": "Nova Micro",
       "model_id": "amazon.nova-micro-v1:0",
       "regions": 
@@ -72,6 +80,22 @@ models = [
         }
     },
     {
+      "model_name": "Llama 4 Maverick 17B Instruct",
+      "model_id": "meta.llama4-maverick-17b-instruct-v1:0",
+      "regions": 
+        {
+          "us-east-1": "us",
+        }
+    },
+    {
+      "model_name": "Llama 4 Scout 17B Instruct",
+      "model_id": "meta.llama4-scout-17b-instruct-v1:0",
+      "regions": 
+        {
+          "us-east-1": "us",
+        }
+    },
+    {
       "model_name": "Claude 3.5 Haiku",
       "model_id": "anthropic.claude-3-5-haiku-20241022-v1:0",
       "regions": 
@@ -86,7 +110,7 @@ class Answer(BaseModel):
     reason: str = Field(description="The reason for the answer")
 
 
-def invoke_with_retry(messages, model_name="Claude 3.7 Sonnet", max_retries=3):
+def invoke_with_retry(messages, model_name="Claude 3.7 Sonnet", max_retries=10):
     """
     쓰로틀링 발생 시 다른 리전으로 전환하며 API 호출을 재시도하는 함수
     """
@@ -113,7 +137,7 @@ def invoke_with_retry(messages, model_name="Claude 3.7 Sonnet", max_retries=3):
             # ChatConverse 모델 초기화
             bedrock_model = ChatBedrockConverse(
                 model=cris_model_id,
-                temperature=0.7,
+                temperature=0,
                 max_tokens=1000,
                 region_name=region
             )
