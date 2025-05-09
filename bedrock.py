@@ -143,7 +143,7 @@ def invoke_with_retry(messages, model_name="Claude 3.7 Sonnet", max_retries=10):
             )
             
             # 체인 구성
-            chain = bedrock_model.with_structured_output(Answer)
+            chain = bedrock_model.with_structured_output(Answer, include_raw=True)
             
             # 모델 호출
             return chain.invoke(messages)
