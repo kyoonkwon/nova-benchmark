@@ -8,7 +8,7 @@ from logger import logger
 
 logger.setLevel("ERROR")
 
-model_name = "Claude 3.5 Haiku"
+model_name = "Qwen3 Coder 480B A35B Instruct"
 hf_dataset_id = "HAERAE-HUB/KMMLU"
 dataset_name = "KMMLU"
 kmmlu_category = [
@@ -69,9 +69,7 @@ def process_item(item, model_name, max_retries=10):
     C = item["C"]
     D = item["D"]
 
-    messages = [
-        generate_prompt(question, A, B, C, D),
-    ]
+    messages = generate_prompt(question, A, B, C, D)
 
     retry_count = 0
     while retry_count < max_retries:
@@ -88,6 +86,7 @@ def process_item(item, model_name, max_retries=10):
             time.sleep(30)
 
 # 결과 저장을 위한 디렉토리 생성
+print(f"model: {model_name}")
 os.makedirs('results', exist_ok=True)
 os.makedirs(f'results/{model_name}', exist_ok=True)
 
@@ -97,7 +96,7 @@ for idx, category in enumerate(kmmlu_category):
     # ds_dev = dataset["dev"]
     # ds_dev = ds_dev.map(lambda x: {"answer": "ABCD"[x["answer"]-1]})
 
-    ds_test = dataset["test"]# .select(range(10))
+    ds_test = dataset["test"]#.select(range(1))
     ds_test = ds_test.map(lambda x: {"answer": "ABCD"[x["answer"]-1]})
     
     # 병렬 처리를 위한 리스트 생성
@@ -135,7 +134,9 @@ for idx, category in enumerate(kmmlu_category):
         'C': [item['C'] for item in items],
         'D': [item['D'] for item in items],
         'correct_answer': [item['answer'] for item in items],
-        'model_response': results
+        'model_response': [result[0] for result in results],
+        'usage': [result[1] for result in results],
+        'latency': [result[2] for result in results],
     })
     
     # CSV 파일로 저장
