@@ -141,6 +141,8 @@ for idx, category in enumerate(kmmlu_category):
     # 결과를 데이터프레임으로 변환
     result_df = pd.DataFrame(
         {
+            "model_id": model_name,
+            "category": category,
             "question": [item["question"] for item in items],
             "A": [item["A"] for item in items],
             "B": [item["B"] for item in items],
