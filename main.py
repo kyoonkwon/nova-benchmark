@@ -5,10 +5,17 @@ import concurrent.futures
 import pandas as pd
 import os
 from logger import logger
+import argparse
 
 logger.setLevel("ERROR")
 
-model_name = "Qwen3 Coder 480B A35B Instruct"
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--model_name", type=str)
+args = parser.parse_args()
+model_name = args.model_name
+assert model_name is not None
+
 hf_dataset_id = "HAERAE-HUB/KMMLU"
 dataset_name = "KMMLU"
 kmmlu_category = [
@@ -27,7 +34,6 @@ kmmlu_category = [
     "Education",
     "Electrical-Engineering",
     "Electronics-Engineering",
-    
     "Energy-Management",
     "Environmental-Science",
     "Fashion",
@@ -42,7 +48,6 @@ kmmlu_category = [
     "Law",
     "Machine-Design-and-Manufacturing",
     "Management",
-    
     "Maritime-Engineering",
     "Marketing",
     "Materials-Engineering",
@@ -60,6 +65,7 @@ kmmlu_category = [
     "Taxation",
     "Telecommunications-and-Wireless-Technology",
 ]
+
 
 def process_item(item, model_name, max_retries=10):
     """각 항목을 처리하는 함수"""
@@ -79,16 +85,22 @@ def process_item(item, model_name, max_retries=10):
         except Exception as exc:
             retry_count += 1
             if retry_count >= max_retries:
-                raise Exception(f"최대 재시도 횟수({max_retries})를 초과했습니다: {exc}")
-            logger.error(f"오류 발생, 재시도 중... ({retry_count}/{max_retries}): {exc}")
+                raise Exception(
+                    f"최대 재시도 횟수({max_retries})를 초과했습니다: {exc}"
+                )
+            logger.error(
+                f"오류 발생, 재시도 중... ({retry_count}/{max_retries}): {exc}"
+            )
             # 재시도 사이에 짧은 지연 시간 추가
             import time
+
             time.sleep(30)
+
 
 # 결과 저장을 위한 디렉토리 생성
 print(f"model: {model_name}")
-os.makedirs('results', exist_ok=True)
-os.makedirs(f'results/{model_name}', exist_ok=True)
+os.makedirs("results", exist_ok=True)
+os.makedirs(f"results/{model_name}", exist_ok=True)
 
 for idx, category in enumerate(kmmlu_category):
     dataset = load_dataset(hf_dataset_id, category)
@@ -96,9 +108,9 @@ for idx, category in enumerate(kmmlu_category):
     # ds_dev = dataset["dev"]
     # ds_dev = ds_dev.map(lambda x: {"answer": "ABCD"[x["answer"]-1]})
 
-    ds_test = dataset["test"]#.select(range(1))
-    ds_test = ds_test.map(lambda x: {"answer": "ABCD"[x["answer"]-1]})
-    
+    ds_test = dataset["test"]  # .select(range(1))
+    ds_test = ds_test.map(lambda x: {"answer": "ABCD"[x["answer"] - 1]})
+
     # 병렬 처리를 위한 리스트 생성
     items = list(ds_test)
     results = [None] * len(items)  # 결과를 저장할 리스트
@@ -109,10 +121,10 @@ for idx, category in enumerate(kmmlu_category):
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             # 모든 작업을 예약하고 future 객체를 저장
             future_to_idx = {
-                executor.submit(process_item, item, model_name): i 
+                executor.submit(process_item, item, model_name): i
                 for i, item in enumerate(items)
             }
-        
+
             # 작업이 완료되는 대로 결과 처리
             for future in concurrent.futures.as_completed(future_to_idx):
                 idx = future_to_idx[future]
@@ -121,25 +133,28 @@ for idx, category in enumerate(kmmlu_category):
                     pbar.update(1)
                 except Exception as exc:
                     # 실패한 작업을 다시 예약
-                    logger.warning(f'작업 {idx}에서 에러 발생: {exc}, 재시도합니다.')
+                    logger.warning(f"작업 {idx}에서 에러 발생: {exc}, 재시도합니다.")
                     retry_future = executor.submit(process_item, items[idx])
                     future_to_idx[retry_future] = idx
                     # 프로그레스 바는 업데이트하지 않음 (재시도 작업이 성공할 때만 업데이트)
-    
+
     # 결과를 데이터프레임으로 변환
-    result_df = pd.DataFrame({
-        'question': [item['question'] for item in items],
-        'A': [item['A'] for item in items],
-        'B': [item['B'] for item in items],
-        'C': [item['C'] for item in items],
-        'D': [item['D'] for item in items],
-        'correct_answer': [item['answer'] for item in items],
-        'model_response': [result[0] for result in results],
-        'usage': [result[1] for result in results],
-        'latency': [result[2] for result in results],
-    })
-    
+    result_df = pd.DataFrame(
+        {
+            "question": [item["question"] for item in items],
+            "A": [item["A"] for item in items],
+            "B": [item["B"] for item in items],
+            "C": [item["C"] for item in items],
+            "D": [item["D"] for item in items],
+            "correct_answer": [item["answer"] for item in items],
+            "output_text": [result[0] for result in results],
+            "input_token": [result[1] for result in results],
+            "output_token": [result[2] for result in results],
+            "latency": [result[3] for result in results],
+        }
+    )
+
     # CSV 파일로 저장
-    output_path = f'results/{model_name}/{category}_results.csv'
+    output_path = f"results/{model_name}/{category}_results.csv"
     result_df.to_csv(output_path, index=False)
-    logger.info(f'{category} 결과가 {output_path}에 저장되었습니다.')
+    logger.info(f"{category} 결과가 {output_path}에 저장되었습니다.")

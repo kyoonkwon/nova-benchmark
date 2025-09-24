@@ -1,7 +1,5 @@
 datasets
 logger
-langchain-aws
-langchain-core
 boto3
 tqdm
 pandas
